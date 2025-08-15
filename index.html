@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keiner Calc Pro</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        :root {
+            /* Tema Claro */
+            --background-color: #F8F9FA;
+            --on-surface-color: #1A1C1E;
+            --surface-container-color: #EFEFEF;
+            --primary-color: #6750A4;
+            --on-primary-color: #FFFFFF;
+            --accent-color: #C0A4FF;
+            --on-accent-color: #381E72;
+            --operator-color: #FFB4AB;
+            --on-operator-color: #690005;
+        }
+
+        :root.dark {
+            /* Tema Oscuro */
+            --background-color: #1A1C1E;
+            --on-surface-color: #E3E2E6;
+            --surface-container-color: #2F3034;
+            --primary-color: #D0BCFF;
+            --on-primary-color: #381E72;
+            --accent-color: #8C6AFF;
+            --on-accent-color: #FFFFFF;
+            --operator-color: #FFB4AB;
+            --on-operator-color: #690005;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--on-surface-color);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .calculator {
+            width: 350px;
+            background-color: var(--surface-container-color);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .theme-toggle-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .theme-toggle-btn {
+            font-size: 24px;
+            color: var(--on-surface-color);
+            user-select: none;
+        }
+
+        .display {
+            text-align: right;
+            padding: 20px;
+            border-radius: 12px;
+            background-color: var(--background-color);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .result-display {
+            font-size: 3em;
+            font-weight: 300;
+            color: var(--on-surface-color);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .btn {
+            font-size: 1.5em;
+            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            background-color: var(--background-color);
+            color: var(--on-surface-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            filter: brightness(0.95);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.accent {
+            background-color: var(--accent-color);
+            color: var(--on-accent-color);
+        }
+
+        .btn.operator {
+            background-color: var(--operator-color);
+            color: var(--on-operator-color);
+        }
+
+        .btn.equals {
+            background-color: var(--primary-color);
+            color: var(--on-primary-color);
+        }
+
+        .btn.zero {
+            grid-column: span 2;
+        }
+
+        /* Ajustes de responsividad */
+        @media (max-width: 480px) {
+            .calculator {
+                width: 100%;
+                max-width: 400px;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+            }
+            
+            body {
+                align-items: flex-end;
+            }
+
+            .display {
+                flex-grow: 1;
+                display: flex;
+                align-items: flex-end;
+                padding: 0 16px;
+            }
+
+            .result-display {
+                font-size: 4em;
+            }
+
+            .buttons {
+                gap: 8px;
+            }
+
+            .btn {
+                font-size: 1.2em;
+                padding: 18px;
+            }
+
+            .theme-toggle-container {
+                top: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="theme-toggle-container">
+            <span class="material-symbols-outlined theme-toggle-btn">
+                light_mode
+            </span>
+        </div>
+        <div class="display">
+            <div class="result-display">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn accent">AC</button>
+            <button class="btn accent">+/-</button>
+            <button class="btn accent">%</button>
+            <button class="btn operator">/</button>
+            <button class="btn">7</button>
+            <button class="btn">8</button>
+            <button class="btn">9</button>
+            <button class="btn operator">*</button>
+            <button class="btn">4</button>
+            <button class="btn">5</button>
+            <button class="btn">6</button>
+            <button class="btn operator">-</button>
+            <button class="btn">1</button>
+            <button class="btn">2</button>
+            <button class="btn">3</button>
+            <button class="btn operator">+</button>
+            <button class="btn zero">0</button>
+            <button class="btn">.</button>
+            <button class="btn equals operator">=</button>
+        </div>
+    </div>
+    <script>
+        const resultDisplay = document.querySelector('.result-display');
+        const buttons = document.querySelectorAll('.btn');
+        const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+        let currentInput = '';
+        let firstOperand = null;
+        let operator = null;
+        let expectingSecondOperand = false;
+
+        function updateDisplay() {
+            resultDisplay.textContent = currentInput || '0';
+        }
+
+        function handleNumber(number) {
+            if (expectingSecondOperand) {
+                currentInput = number;
+                expectingSecondOperand = false;
+            } else {
+                currentInput = currentInput === '0' ? number : currentInput + number;
+            }
+            updateDisplay();
+        }
+
+        function handleOperator(nextOperator) {
+            const inputValue = parseFloat(currentInput);
+
+            if (operator && expectingSecondOperand) {
+                operator = nextOperator;
+                return;
+            }
+
+            if (firstOperand === null) {
+                firstOperand = inputValue;
+            } else if (operator) {
+                const result = calculate(firstOperand, inputValue, operator);
+                currentInput = String(result);
+                firstOperand = result;
+            }
+
+            expectingSecondOperand = true;
+            operator = nextOperator;
+            updateDisplay();
+        }
+
+        function calculate(first, second, op) {
+            if (op === '+') return first + second;
+            if (op === '-') return first - second;
+            if (op === '*') return first * second;
+            if (op === '/') return first / second;
+            if (op === '%') return first % second;
+            return second;
+        }
+
+        function handleEquals() {
+            const inputValue = parseFloat(currentInput);
+            if (operator && firstOperand !== null) {
+                currentInput = String(calculate(firstOperand, inputValue, operator));
+                firstOperand = null;
+                operator = null;
+                expectingSecondOperand = false;
+                updateDisplay();
+            }
+        }
+
+        function handleClear() {
+            currentInput = '';
+            firstOperand = null;
+            operator = null;
+            expectingSecondOperand = false;
+            updateDisplay();
+        }
+
+        function handleSign() {
+            currentInput = String(parseFloat(currentInput) * -1);
+            updateDisplay();
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const value = e.target.textContent;
+
+                if (!isNaN(parseFloat(value)) || value === '.') {
+                    handleNumber(value);
+                } else if (value === 'AC') {
+                    handleClear();
+                } else if (value === '+/-') {
+                    handleSign();
+                } else if (value === '=') {
+                    handleEquals();
+                } else {
+                    handleOperator(value);
+                }
+            });
+        });
+
+        // Lógica para cambiar el tema
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggleBtn.textContent = 'light_mode';
+            } else {
+                themeToggleBtn.textContent = 'dark_mode';
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
